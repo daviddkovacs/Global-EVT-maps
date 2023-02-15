@@ -1,5 +1,5 @@
 
-Hello!
+
 
 We present the workflow for the retrieval of global maps in Google Earth Engine (GEE) of 4 Essential Vegetation Traits (EVTs): 
 
