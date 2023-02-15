@@ -15,4 +15,4 @@ The models are based on Gaussian process regression (GPR) algorithms trained on 
 ![12124r1](https://user-images.githubusercontent.com/123364246/219020011-22517ec1-2cf6-4b91-8334-fdd813aac119.png)
 
 
-You can use the Colab file containing a Python script with comments and descriptions to retrieve the maps in your own GEE environment.
+You can use the Colab file (Batch_export_EVT_maps.ipynb) containing a Python script with comments and descriptions to retrieve the maps in your own GEE environment.
