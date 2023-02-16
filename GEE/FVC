@@ -1,6 +1,6 @@
 // Insert your ImageCollection that you have exported with the Python Colab script below:
 
-var col = ee.ImageCollection("projects/ee-dkvcsdvd/assets/ImageCollectionsFinal/FVC_Final");      
+var col = ee.ImageCollection("YOUR IMAGE COLLECTION HERE");      
 
 
 
