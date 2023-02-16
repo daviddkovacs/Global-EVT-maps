@@ -10,10 +10,11 @@ The code features the non-reconstructed S3-TOA-GPR-1.0 maps, the Whittaker smoot
 FAPAR:
 https://code.earthengine.google.com/3225e78586a6444026e168b7b68bccf8	
 
+LAI:
+https://code.earthengine.google.com/739d3af5603309b5717bc4fb1cb81b7d
 
 FVC:
 https://code.earthengine.google.com/089dde7496257bd0aab5d7e6b6603fec
 
-
-LAI:
-https://code.earthengine.google.com/739d3af5603309b5717bc4fb1cb81b7d
+LCC:
+https://code.earthengine.google.com/5908670f83306cf99ffe02ed26a8d2ed
