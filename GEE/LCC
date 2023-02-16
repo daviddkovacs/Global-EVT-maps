@@ -1,0 +1,241 @@
+// Insert your ImageCollection that you have exported with the Python Colab script below:
+
+var col = ee.ImageCollection("YOUR IMAGE COLLECTION HERE");      
+
+
+//Defining the temporal domain for the investigated collection of images
+//The displayed map is the mean value of the pixels withing the set of temporal domain
+var datebegin = ee.Date('2019-01-01')
+var dateend = ee.Date('2019-12-30')
+
+
+
+
+
+
+////////////////////// Processing below, you don't need to worry about it //////////////////////
+
+var World = ee.FeatureCollection("projects/ee-dkvcsdvd/assets/Output/World_shapefile"),
+    geometry = 
+    /* color: #d63000 */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.FeatureCollection(
+        [ee.Feature(
+            ee.Geometry.Polygon(
+                [[[-0.3700729502429523, 39.302129121067836],
+                  [-0.3700729502429523, 39.24153041352676],
+                  [-0.2835556162585773, 39.24153041352676],
+                  [-0.2835556162585773, 39.302129121067836]]], null, false),
+            {
+              "system:index": "0"
+            })]),
+imageVisParam = {"opacity":1,"bands":["LCC_UNCERTAINTY_GREEN"],"min":23.54452004201687,"max":67.77963601950151,"palette":["ffffff","002bff"]};
+//Defining masks for deserts and water
+var bare_cover = ee.Image("COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019")
+.select('bare-coverfraction').lte(90);
+var lakes = ee.Image("COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019")
+.select('discrete_classification').eq(80)
+var lakemask = lakes.eq(0);
+
+//Masking 
+var colmap = col.filterDate(datebegin,dateend).select("LCC_GREEN").mean()
+var unc = col.filterDate(datebegin,dateend).select("LCC_UNCERTAINTY_GREEN").mean()
+colmap = colmap.mask(lakemask)
+colmap = colmap.mask(bare_cover)
+var colmapmask = colmap.gte(0.00001)
+colmap = colmap.mask(colmapmask)
+
+//Whittaker smoother temporal reconstruction
+function extractBits(image, start, end, newName) {
+    // Compute the bits we need to extract.
+    var pattern = 0;
+    for (var i = start; i <= end; i++) {
+       pattern += Math.pow(2, i);
+    }
+    return image.select([0], [newName])
+                  .bitwiseAnd(pattern)
+                  .rightShift(start);
+}
+
+// function to get a Difference mattrix of specified order
+// on the input matrix. takes matrix and order as parameters
+function getDifferenceMatrix(inputMatrix, order){
+    var rowCount = ee.Number(inputMatrix.length().get([0]));
+    var left = inputMatrix.slice(0,0,rowCount.subtract(1));
+    var right = inputMatrix.slice(0,1,rowCount);
+    if (order > 1 ){
+        return getDifferenceMatrix(left.subtract(right), order-1)}
+    return left.subtract(right);
+};
+
+// unpacks an array image into images and bands
+// takes an array image, list of image IDs and list of band names as arguments
+function unpack(arrayImage, imageIds, bands){
+    
+    function iter(item, icoll){
+        
+        function innerIter(innerItem, innerList){
+            return ee.List(innerList).add(ee.String(item).cat("_").cat(ee.String(innerItem)))}
+        
+        var temp = bands.iterate(innerIter, ee.List([]));
+        return ee.ImageCollection(icoll)
+            .merge(ee.ImageCollection(ee.Image(arrayImage).select(temp,bands).set("id",item)))}
+
+    var imgcoll  = ee.ImageCollection(imageIds.iterate(iter, ee.ImageCollection([])));
+    return imgcoll}
+
+
+
+// Function to compute the inverse log ratio of a regression results to 
+// transform back to percent units
+function inverseLogRatio(image) {
+  var bands = image.bandNames();
+  var t = image.get("system:time_start");
+  var ilrImage = ee.Image(100).divide(ee.Image(1).add(image.exp())).rename(bands);
+  return ilrImage.set("system:time_start",t);
+}
+
+function whittakerSmoothing(imageCollection, isCompositional, lambda){
+  // quick configs to set defaults
+  if (isCompositional === undefined || isCompositional !==true) isCompositional = false;
+  if (lambda === undefined ) lambda = 100;
+
+  // procedure start  
+  var ic = imageCollection.map(function(image){
+     var t = image.get("system:time_start");
+    return image.toFloat().set("system:time_start",t);
+  });
+
+  var dimension = ic.size();
+  var identity_mat = ee.Array.identity(dimension);
+  var difference_mat = getDifferenceMatrix(identity_mat,3);
+  var difference_mat_transpose = difference_mat.transpose();
+  var lamda_difference_mat = difference_mat_transpose.multiply(lambda);
+  var res_mat = lamda_difference_mat.matrixMultiply(difference_mat);
+  var hat_matrix = res_mat.add(identity_mat);
+
+  
+  // backing up original data
+  var original = ic;
+
+  // get original image properties
+  var properties = ee.List(ic.iterate(function(image, list){
+    return ee.List(list).add(image.toDictionary());
+  },[]));
+  
+  var time = ee.List(ic.iterate(function(image, list){
+    return ee.List(list).add(image.get("system:time_start"));
+  },[]));
+  
+  // if data is compositional
+  // calculate the logratio of an image between 0 and 100. First
+  // clamps between delta and 100-delta, where delta is a small positive value.
+  if (isCompositional){
+    ic = ic.map(function(image){
+      var t = image.get("system:time_start");
+      var delta = 0.001;
+      var bands = image.bandNames();
+      image = image.clamp(delta,100-delta);
+      image = (ee.Image.constant(100).subtract(image)).divide(image).log().rename(bands);
+      return image.set("system:time_start",t);
+    });
+  }
+
+  var arrayImage = original.toArray();
+  var coeffimage = ee.Image(hat_matrix);
+  var smoothImage = coeffimage.matrixSolve(arrayImage);
+  
+  var idlist = ee.List(ic.iterate(function(image, list){
+    return ee.List(list).add(image.id());
+  },[]));
+  var bandlist = ee.Image(ic.first()).bandNames();
+  
+  var flatImage = smoothImage.arrayFlatten([idlist,bandlist]);
+  var smoothCollection = ee.ImageCollection(unpack(flatImage, idlist, bandlist));
+  
+  if (isCompositional){
+    smoothCollection = smoothCollection.map(inverseLogRatio);
+  }
+  // get new band names by adding suffix fitted
+  var newBandNames = bandlist.map(function(band){return ee.String(band).cat("_fitted")});
+  // rename the bands in smoothened images
+  smoothCollection = smoothCollection.map(function(image){return ee.Image(image).rename(newBandNames)});
+  
+  // a really dumb way to loose the google earth engine generated ID so that the two
+  // images can be combined for the chart
+  var dumbimg = arrayImage.arrayFlatten([idlist,bandlist]);
+  var dumbcoll = ee.ImageCollection(unpack(dumbimg,idlist, bandlist));
+  var outCollection = dumbcoll.combine(smoothCollection);
+  
+  var outCollectionProp = outCollection.iterate(function(image,list){
+      var t = image.get("system:time_start")
+    return ee.List(list).add(image.set(properties.get(ee.List(list).size())));
+  },[]);
+
+  var outCollectionProp = outCollection.iterate(function(image,list){
+    return ee.List(list).add(image.set("system:time_start",time.get(ee.List(list).size())));
+  },[]);
+
+
+  var residue_sq = smoothImage.subtract(arrayImage).pow(ee.Image(2)).divide(dimension);
+  var rmse_array = residue_sq.arrayReduce(ee.Reducer.sum(),[0]).pow(ee.Image(1/2));
+  
+  var rmseImage = rmse_array.arrayFlatten([["rmse"],bandlist]);
+  
+  return [ee.ImageCollection.fromImages(outCollectionProp), rmseImage];
+}
+
+var WS = col.filterDate(datebegin,dateend);
+
+// getting rid of masked pixels
+WS = WS.map(function(img){return img.unmask(WS.mean())});
+var WS =  whittakerSmoothing(WS)[0];
+var WSmapsmoothed = WS.select('LCC_GREEN_fitted').mean()
+WSmapsmoothed = WSmapsmoothed.mask(lakemask)
+WSmapsmoothed = WSmapsmoothed.mask(bare_cover)
+var colmapmaskWhitt = WSmapsmoothed.gte(0.00001)
+WSmapsmoothed = WSmapsmoothed.mask(colmapmaskWhitt)
+//End of Whittaker smoother algorithm
+
+
+
+
+print(ui.Chart.image.series(
+  WS.select("LCC_GREEN_fitted"), geometry, ee.Reducer.mean(), 500)
+    .setSeriesNames(['LCC WS Reconstructed'])
+    .setOptions({
+      title: 'Whittaker reconstructed time series',
+      vAxis: {title: 'LCC', maxValue: 1, minValue: 0},
+      hAxis: {title: 'Date', format: 'MM-yy', gridlines: {count: 12}},
+      lineWidth: 1,
+      pointSize: 3,
+}));
+
+unc = unc.mask(lakemask)
+unc = unc.mask(bare_cover)
+var uncmask = unc.gte(0.00001)
+unc = unc.mask(uncmask)
+
+
+// Visualization and palette for LCC
+var colorizedVis = {
+  min: 0,
+  max: 90,
+  palette: ['fdf9ed', 'fff7ce', 'aae69c', '37a913', '113a00'],
+};
+
+Map.addLayer(colmap ,colorizedVis,'S3-TOA-GPR-1.0')
+Map.addLayer(WSmapsmoothed,colorizedVis,'S3-TOA-GPR-1.0 WS reconstructed')
+Map.addLayer(unc,imageVisParam,'Uncertainty')
+
+
+
+
+
+
+
+
