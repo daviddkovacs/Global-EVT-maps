@@ -10,7 +10,7 @@ We present the workflow for the retrieval of global maps in Google Earth Engine 
 
 
 Sentinel-3 (S3) top-of-atmosphere (TOA) OLCI data is used with hybrid retrieval models to infer globally four essential vegetation traits (EVTs):
-The models are based on Gaussian process regression (GPR) algorithms trained on SCOPE-6SV model simulations, and so applicable to process TOA OLCI date.
+The models are based on Gaussian process regression (GPR) algorithms trained on SCOPE-6SV model simulations, and so applicable to process TOA OLCI data.
 This workflow is the global extension of the regional study: https://github.com/psreyes/S3_TOA_GPR_1
 
 
