@@ -12,7 +12,7 @@ We present the workflow for the retrieval of global maps in Google Earth Engine 
 Sentinel-3 (S3) top-of-atmosphere (TOA) OLCI data is used with hybrid retrieval models to infer globally four essential vegetation traits (EVTs):
 The models are based on Gaussian process regression (GPR) algorithms trained on SCOPE-6SV model simulations, and so applicable to process TOA OLCI data.
 This workflow is the global extension of the regional study: https://github.com/psreyes/S3_TOA_GPR_1
-Within the GEE folder, you will find the scripts used to visualize these products in the GEE environment. Furthermore, the Whittaker smoother temporal reconstruction method is implemented in the GEE JavaScript code, that will produce gap-free maps.
+Within the GEE folder, you will find the scripts used to visualize these products in the GEE environment. Furthermore, the Whittaker smoother temporal reconstruction method is implemented in the GEE JavaScript code, that will produce cloud-free maps.
 
 
 ![12124r1](https://user-images.githubusercontent.com/123364246/219020011-22517ec1-2cf6-4b91-8334-fdd813aac119.png)
