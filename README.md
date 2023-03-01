@@ -1,7 +1,7 @@
 
 Hello!
 
-We present the workflow for the retrieval of global maps in Google Earth Engine (GEE) of 4 Essential Vegetation Traits (EVTs): 
+We present the workflow for the retrieval of global cloud-free maps in Google Earth Engine (GEE) of 4 Essential Vegetation Traits (EVTs): 
 
 (1) fraction of absorbed photosynthetically active radiation (FAPAR)
 (2) leaf area index (LAI)
