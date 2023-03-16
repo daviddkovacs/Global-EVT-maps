@@ -8,10 +8,10 @@ The code features the S3-TOA-GPR-1.0 maps, the Whittaker smoother temporal recon
 
 
 FAPAR:
-https://code.earthengine.google.com/3225e78586a6444026e168b7b68bccf8	
+https://code.earthengine.google.com/?scriptPath=users%2Fdkvcsdvd%2FGlobal_EVT_maps%3AFAPAR
 
 LAI:
-https://code.earthengine.google.com/739d3af5603309b5717bc4fb1cb81b7d
+https://code.earthengine.google.com/?scriptPath=users%2Fdkvcsdvd%2FGlobal_EVT_maps%3ALAI
 
 FVC:
 https://code.earthengine.google.com/089dde7496257bd0aab5d7e6b6603fec
