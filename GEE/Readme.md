@@ -5,6 +5,10 @@ This folder contains the JavaScript codes that are for the processing of the S3-
 
 The code features the S3-TOA-GPR-1.0 maps, the Whittaker smoother temporal reconstruction and the Gaussian Process Regression's Uncertainties too. The code is written in a way that you can change the temporal domain of your interest. Keep in mind that the visualization of the data on the global map is the mean pixel value of the images within your set temporal domain.
 
+Access to GEE repo:
+https://code.earthengine.google.com/?accept_repo=users/dkvcsdvd/Global_EVT_maps
+
+
 
 
 FAPAR:
