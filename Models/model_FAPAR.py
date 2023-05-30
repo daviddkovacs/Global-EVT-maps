@@ -86,6 +86,29 @@ bands = ['Oa01_radiance','Oa02_radiance','Oa03_radiance',
 'Oa16_radiance', 'Oa17_radiance', 'Oa18_radiance', 'Oa19_radiance',
 'Oa20_radiance', 'Oa21_radiance']
 
+bands_dict = {"Oa01_radiance": ee.PixelType.float(),
+  "Oa02_radiance": ee.PixelType.float(),
+  "Oa03_radiance": ee.PixelType.float(),
+  "Oa04_radiance": ee.PixelType.float(),
+  "Oa05_radiance": ee.PixelType.float(),
+  "Oa06_radiance": ee.PixelType.float(),
+  "Oa07_radiance": ee.PixelType.float(),
+  "Oa08_radiance": ee.PixelType.float(),
+  "Oa09_radiance": ee.PixelType.float(),
+  "Oa10_radiance": ee.PixelType.float(),
+  "Oa11_radiance": ee.PixelType.float(),
+  "Oa12_radiance": ee.PixelType.float(),
+  "Oa13_radiance": ee.PixelType.float(),
+  "Oa14_radiance": ee.PixelType.float(),
+  "Oa15_radiance": ee.PixelType.float(),
+  "Oa16_radiance": ee.PixelType.float(),
+  "Oa17_radiance": ee.PixelType.float(),
+  "Oa18_radiance": ee.PixelType.float(),
+  "Oa19_radiance": ee.PixelType.float(),
+  "Oa20_radiance": ee.PixelType.float(),
+  "Oa21_radiance": ee.PixelType.float(),
+};
+
 
 
 LMatrixInverse = ee.Array([[0.782574552868169,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
